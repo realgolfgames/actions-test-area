@@ -1,0 +1,43 @@
+name: Update README with code stats
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  update-readme:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+
+      - name: Install tokei
+        run: |
+          curl -sSL https://github.com/XAMPPRocky/tokei/releases/download/v12.1.2/tokei-x86_64-unknown-linux-gnu.tar.gz | tar xz
+          mv tokei /usr/local/bin/
+
+      - name: Get code stats
+        run: |
+          stats=$(tokei .)
+          echo "$stats"
+
+      - name: Update README
+        run: |
+          stats=$(tokei .)
+          sed -i "s/<!-- CODE_STATS_TABLE_PLACEHOLDER -->/\`\`\`$stats\`\`\`/g" README.md
+
+      - name: Commit changes
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add README.md
+          git commit -m "Update README with code stats" || echo "No changes to commit"
+
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: main
+          force: true
