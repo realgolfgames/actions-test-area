@@ -37,7 +37,6 @@ jobs:
         run: |
           stats=$(tokei .)
           stats_formatted=$(echo "$stats" | awk 'BEGIN{printf "%-21s%-12s%-12s%-12s%-12s\n", "Language", "Files", "Lines", "Code", "Comments"} {if(NR==1 || NR==2 || NF>2) print}' | sed 's/Total/-------------------------------------------------------------------------/g' | sed 's/\s\+|/-/g')
-          chmod +w README.md  # Add write permission to the README file
           sed -i "s/<!-- CODE_STATS_TABLE_PLACEHOLDER -->/\`\`\`$stats_formatted\`\`\`/g" README.md
 
       - name: Commit changes
