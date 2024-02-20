@@ -11,7 +11,12 @@ jobs:
 
     steps:
       - name: Check out code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4 # Use a version compatible with Node.js 20
+
+      - name: Use Node.js 20
+        uses: actions/setup-node@v3
+        with:
+          node-version: "20"
 
       - name: Install tokei
         run: |
@@ -23,11 +28,16 @@ jobs:
           stats=$(tokei .)
           echo "$stats"
 
+      - name: Format code stats
+        run: |
+          stats_formatted=$(echo "$stats" | awk 'BEGIN{printf "%-21s%-12s%-12s%-12s%-12s\n", "Language", "Files", "Lines", "Code", "Comments"} {if(NR==1 || NR==2 || NF>2) print}' | sed 's/Total/-------------------------------------------------------------------------/g' | sed 's/\s\+|/-/g')
+          echo "$stats_formatted"
+
       - name: Update README
         run: |
           stats=$(tokei .)
-          stats_escaped=$(echo "$stats" | sed 's/[\/&]/\\&/g')  # Escape special characters
-          sed -i "s/<!-- CODE_STATS_TABLE_PLACEHOLDER -->/\`\`\`$stats_escaped\`\`\`/g" README.md
+          stats_formatted=$(echo "$stats" | awk 'BEGIN{printf "%-21s%-12s%-12s%-12s%-12s\n", "Language", "Files", "Lines", "Code", "Comments"} {if(NR==1 || NR==2 || NF>2) print}' | sed 's/Total/-------------------------------------------------------------------------/g' | sed 's/\s\+|/-/g')
+          sed -i "s/<!-- CODE_STATS_TABLE_PLACEHOLDER -->/\`\`\`$stats_formatted\`\`\`/g" README.md
 
       - name: Commit changes
         run: |
