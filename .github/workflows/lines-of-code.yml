@@ -26,7 +26,8 @@ jobs:
       - name: Update README
         run: |
           stats=$(tokei .)
-          sed -i "s/<!-- CODE_STATS_TABLE_PLACEHOLDER -->/\`\`\`$stats\`\`\`/g" README.md
+          stats_escaped=$(echo "$stats" | sed 's/[\/&]/\\&/g')  # Escape special characters
+          sed -i "s/<!-- CODE_STATS_TABLE_PLACEHOLDER -->/\`\`\`$stats_escaped\`\`\`/g" README.md
 
       - name: Commit changes
         run: |
